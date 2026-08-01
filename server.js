@@ -35,7 +35,7 @@ app.use(express.static('public'));
 
 // Sessions pour l'admin
 app.use(session({
-    secret: 'x-honeypot-secret-key-change-me',
+    secret: process.env.SESSION_SECRET || 'x-honeypot-secret-key-change-me',
     resave: false,
     saveUninitialized: false,
     cookie: { 

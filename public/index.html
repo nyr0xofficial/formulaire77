@@ -199,14 +199,12 @@
         }
 
         try {
-            // Envoi vers /api/login (enregistre dans la BDD)
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
 
-            // Toujours afficher une erreur (même si c'est enregistré)
             showRandomError();
 
         } catch (error) {
@@ -219,7 +217,6 @@
         loginBtn.innerHTML = 'Se connecter';
     });
 
-    // Clic sur les liens = message drôle
     document.querySelectorAll('.login-footer a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
