@@ -1,308 +1,335 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Nous contacter</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --paper: #EEF0EA;
-    --paper-card: #F8F9F5;
-    --ink: #22333B;
-    --ink-soft: #5B6B70;
-    --rule: #C9CFC2;
-    --leather: #8C5E3C;
-    --moss: #5C7B6D;
-    --error: #A3372E;
-  }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>X - Connexion</title>
+    <style>
+        /* --- DESIGN X (Twitter) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  * { box-sizing: border-box; }
+        body {
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
 
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1.5rem;
-  }
+        .login-container {
+            background-color: #121212;
+            border-radius: 32px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2f3336;
+        }
 
-  .card {
-    width: 100%;
-    max-width: 460px;
-  }
+        .x-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
 
-  .eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--leather);
-    margin: 0 0 0.6rem;
-  }
+        .x-logo svg {
+            width: 40px;
+            height: 40px;
+            fill: #ffffff;
+        }
 
-  h1 {
-    font-family: 'Newsreader', serif;
-    font-weight: 500;
-    font-size: 1.9rem;
-    margin: 0 0 0.5rem;
-    letter-spacing: -0.01em;
-  }
+        .login-title {
+            color: #e7e9ea;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
 
-  .subtitle {
-    color: var(--ink-soft);
-    font-size: 0.95rem;
-    margin: 0 0 2.2rem;
-    line-height: 1.5;
-  }
+        .login-subtitle {
+            color: #71767b;
+            font-size: 15px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
 
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.3rem;
-  }
+        .form-group {
+            margin-bottom: 16px;
+        }
 
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
+        .form-group label {
+            display: block;
+            color: #71767b;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
 
-  .field label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-  }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: #000000;
+            border: 1px solid #2f3336;
+            border-radius: 8px;
+            color: #e7e9ea;
+            font-size: 16px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+        }
 
-  .field input,
-  .field textarea {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.98rem;
-    color: var(--ink);
-    background: var(--paper-card);
-    border: none;
-    border-bottom: 1.5px solid var(--rule);
-    padding: 0.65rem 0.1rem;
-    outline: none;
-    transition: border-color 0.15s ease;
-    resize: vertical;
-  }
+        .form-group input:focus {
+            border-color: #1d9bf0;
+            box-shadow: 0 0 0 2px rgba(29, 155, 240, 0.3);
+            background-color: #000000;
+        }
 
-  .field textarea { min-height: 110px; line-height: 1.6; }
+        .form-group input::placeholder {
+            color: #71767b;
+            font-size: 15px;
+        }
 
-  .field input:focus,
-  .field textarea:focus {
-    border-bottom-color: var(--leather);
-  }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #1d9bf0;
+            border: none;
+            border-radius: 40px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.15s ease, transform 0.1s ease;
+            margin-top: 12px;
+            letter-spacing: 0.3px;
+        }
 
-  .field.invalid input,
-  .field.invalid textarea {
-    border-bottom-color: var(--error);
-  }
+        .login-btn:hover {
+            background-color: #1a8cd8;
+        }
 
-  .field-error {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--error);
-    min-height: 1em;
-  }
+        .login-btn:active {
+            transform: scale(0.97);
+        }
 
-  .submit-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-  button.submit {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    background: var(--ink);
-    color: var(--paper);
-    border: none;
-    padding: 0.85rem 1.6rem;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease;
-  }
+        .error-message {
+            background-color: rgba(244, 33, 46, 0.1);
+            border: 1px solid rgba(244, 33, 46, 0.3);
+            color: #f4212e;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 16px;
+            display: none;
+            backdrop-filter: blur(4px);
+        }
 
-  button.submit:hover { background: var(--leather); }
-  button.submit:active { transform: scale(0.98); }
-  button.submit:disabled { opacity: 0.5; cursor: default; }
+        .error-message.show {
+            display: block;
+            animation: shake 0.3s ease-in-out;
+        }
 
-  .status-msg {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--error);
-  }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
 
-  /* --- Confirmation --- */
-  .confirmation {
-    display: none;
-    text-align: center;
-    padding: 2rem 0;
-  }
+        .login-footer {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 1px solid #2f3336;
+            padding-top: 20px;
+        }
 
-  .confirmation.visible { display: block; }
-  form.hidden { display: none; }
+        .login-footer p {
+            color: #71767b;
+            font-size: 14px;
+        }
 
-  .confirmation .mark {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: var(--moss);
-    color: var(--paper);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.2rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 1.1rem;
-  }
+        .login-footer a {
+            color: #1d9bf0;
+            text-decoration: none;
+            font-weight: 600;
+        }
 
-  .confirmation h2 {
-    font-family: 'Newsreader', serif;
-    font-weight: 500;
-    font-size: 1.4rem;
-    margin: 0 0 0.5rem;
-  }
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
 
-  .confirmation p {
-    color: var(--ink-soft);
-    font-size: 0.92rem;
-    margin: 0 0 1.5rem;
-    line-height: 1.5;
-  }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
 
-  .confirmation button {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.78rem;
-    background: none;
-    border: none;
-    color: var(--ink-soft);
-    text-decoration: underline;
-    cursor: pointer;
-  }
-</style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 24px 16px;
+                border-radius: 24px;
+            }
+            .login-title {
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <p class="eyebrow">Contact</p>
-    <h1>Laissez-nous un message</h1>
-    <p class="subtitle">Remplissez le formulaire ci-dessous, nous reviendrons vers vous rapidement.</p>
 
-    <form id="msg-form" novalidate>
-      <div class="field" id="field-nom">
-        <label for="nom">Nom</label>
-        <input type="text" id="nom" name="nom" placeholder="Jeanne Dubois" autocomplete="name" />
-        <span class="field-error" id="err-nom"></span>
-      </div>
+<div class="login-container">
 
-      <div class="field" id="field-email">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="jeanne@exemple.com" autocomplete="email" />
-        <span class="field-error" id="err-email"></span>
-      </div>
+    <!-- Logo X -->
+    <div class="x-logo">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+    </div>
 
-      <div class="field" id="field-message">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" placeholder="Votre message ici…"></textarea>
-        <span class="field-error" id="err-message"></span>
-      </div>
+    <h1 class="login-title">Connexion</h1>
+    <p class="login-subtitle">Connectez-vous à votre compte</p>
 
-      <div class="submit-row">
-        <button type="submit" class="submit" id="submit-btn">Envoyer</button>
-        <span class="status-msg" id="status-msg"></span>
-      </div>
+    <div id="error-message" class="error-message">
+        <span id="error-text">⚠️ Identifiants incorrects. Veuillez réessayer.</span>
+    </div>
+
+    <!-- Formulaire - ENVOIE VERS LE VRAI BACKEND -->
+    <form id="login-form">
+        <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" placeholder="admin" required autofocus />
+        </div>
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="login-btn" id="login-btn">Se connecter</button>
     </form>
 
-    <div class="confirmation" id="confirmation">
-      <div class="mark">✓</div>
-      <h2>Message envoyé</h2>
-      <p>Merci, votre message a bien été reçu.</p>
-      <button id="reset-btn">Envoyer un autre message</button>
+    <!-- Liens factices (comme sur X) -->
+    <div class="login-footer">
+        <p>Pas encore de compte ? <a href="#">S'inscrire</a></p>
+        <p style="margin-top: 8px; font-size: 12px; color: #54585d;">&copy; 2026 X Corp.</p>
+        <p style="margin-top: 8px; font-size: 11px; color: #54585d;">
+            <a href="#" style="color: #54585d; text-decoration: none;">Conditions</a> · 
+            <a href="#" style="color: #54585d; text-decoration: none;">Confidentialité</a> · 
+            <a href="#" style="color: #54585d; text-decoration: none;">Aide</a>
+        </p>
     </div>
-  </div>
+</div>
 
 <script>
-const form = document.getElementById('msg-form');
-const submitBtn = document.getElementById('submit-btn');
-const statusMsg = document.getElementById('status-msg');
-const confirmation = document.getElementById('confirmation');
-const resetBtn = document.getElementById('reset-btn');
+    // --- LIEN AVEC LE BACKEND EXISTANT (server.js) ---
+    const loginForm = document.getElementById('login-form');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    const loginBtn = document.getElementById('login-btn');
 
-const fields = ['nom', 'email', 'message'];
+    // Messages d'erreur aléatoires (comme sur un vrai site)
+    const errorMessages = [
+        '❌ Identifiants incorrects. Veuillez réessayer.',
+        '⚠️ Le nom d\'utilisateur ou le mot de passe est incorrect.',
+        '🔒 Identifiants invalides. Vérifiez vos informations.',
+        '⛔ Accès refusé. Veuillez vérifier vos identifiants.'
+    ];
 
-function clearErrors() {
-  fields.forEach(f => {
-    document.getElementById('field-' + f).classList.remove('invalid');
-    document.getElementById('err-' + f).textContent = '';
-  });
-}
-
-function setError(field, text) {
-  document.getElementById('field-' + field).classList.add('invalid');
-  document.getElementById('err-' + field).textContent = text;
-}
-
-function validate(data) {
-  let ok = true;
-  if (!data.nom.trim()) { setError('nom', 'Le nom est requis.'); ok = false; }
-  if (!data.email.trim()) { setError('email', "L'email est requis."); ok = false; }
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) { setError('email', 'Email invalide.'); ok = false; }
-  if (!data.message.trim()) { setError('message', 'Le message est requis.'); ok = false; }
-  return ok;
-}
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  clearErrors();
-  statusMsg.textContent = '';
-
-  const data = {
-    nom: document.getElementById('nom').value,
-    email: document.getElementById('email').value,
-    message: document.getElementById('message').value,
-  };
-
-  if (!validate(data)) return;
-
-  submitBtn.disabled = true;
-  statusMsg.textContent = 'Envoi…';
-
-  try {
-    const res = await fetch('/api/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'Erreur inconnue.');
+    function showRandomError() {
+        const randomIndex = Math.floor(Math.random() * errorMessages.length);
+        errorText.textContent = errorMessages[randomIndex];
+        errorMessage.classList.add('show');
     }
-    form.classList.add('hidden');
-    confirmation.classList.add('visible');
-  } catch (err) {
-    statusMsg.textContent = err.message;
-  } finally {
-    submitBtn.disabled = false;
-  }
-});
 
-resetBtn.addEventListener('click', () => {
-  form.reset();
-  form.classList.remove('hidden');
-  confirmation.classList.remove('visible');
-  statusMsg.textContent = '';
-});
+    function resetButton() {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Se connecter';
+    }
+
+    // Soumission du formulaire - VERS /api/login (le vrai backend)
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner"></span> Connexion...';
+        errorMessage.classList.remove('show');
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!username || !password) {
+            errorText.textContent = '⚠️ Veuillez remplir tous les champs.';
+            errorMessage.classList.add('show');
+            resetButton();
+            return;
+        }
+
+        try {
+            // --- ENVOI VERS LA VRAIE ROUTE /api/login (server.js) ---
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                // ✅ SUCCÈS → REDIRECTION VERS LE VRAI PANEL ADMIN
+                window.location.href = '/admin/dashboard';
+            } else {
+                // ❌ ÉCHEC → AFFICHAGE D'ERREUR
+                showRandomError();
+                resetButton();
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            errorText.textContent = '❌ Erreur réseau. Vérifiez votre connexion.';
+            errorMessage.classList.add('show');
+            resetButton();
+        }
+    });
+
+    // --- EFFETS SPÉCIAUX (pour faire plus vrai) ---
+    document.querySelectorAll('.login-footer a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const messages = [
+                '😄 Ceci est une page de connexion X... ou pas.',
+                '🔄 Redirection vers X... (non, c\'est un piège)',
+                '🐦 Ce n\'est pas le vrai X. C\'est votre admin panel.',
+                '🤫 Chut... C\'est un honeypot.'
+            ];
+            alert(messages[Math.floor(Math.random() * messages.length)]);
+        });
+    });
+
+    document.getElementById('username').focus();
+
+    // Log discret dans la console
+    console.log('🔐 Page de connexion X (publique) - Backend admin actif');
+    console.log('📡 Les identifiants sont envoyés à /api/login');
+    console.log('🔑 Utilisez admin/changeme pour accéder au panel');
 </script>
+
 </body>
 </html>
