@@ -200,7 +200,7 @@
             empty.style.display = 'none';
 
             const response = await fetch(API_URL);
-            if (response.status === 401) {
+            if (response.status === 401 || response.status === 403) {
                 window.location.href = '/admin';
                 return;
             }

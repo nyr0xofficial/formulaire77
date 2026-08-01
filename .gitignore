@@ -1,5 +1,4 @@
 node_modules/
 local.db
-*.log
-*.pid
 .env
+.DS_Store

@@ -69,6 +69,7 @@
             margin-top: 12px;
         }
         .login-btn:hover { background-color: #1a8cd8; }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-message {
             background-color: rgba(244, 33, 46, 0.1);
             border: 1px solid rgba(244, 33, 46, 0.3);
@@ -127,11 +128,8 @@
         e.preventDefault();
         console.log('🔄 Tentative de connexion...');
         
-        // Cacher les anciens messages
         errorMsg.classList.remove('show');
         successMsg.classList.remove('show');
-        
-        // Désactiver le bouton
         loginBtn.disabled = true;
         loginBtn.textContent = '⏳ Connexion...';
 
@@ -152,16 +150,12 @@
             console.log(`📡 Réponse du serveur : ${response.status}`);
 
             if (response.ok) {
-                // Succès
                 successMsg.classList.add('show');
                 loginBtn.textContent = '✅ Connecté';
-                
-                // Redirection après 1.5 secondes
                 setTimeout(() => {
                     window.location.href = '/admin/dashboard';
                 }, 1500);
             } else {
-                // Échec
                 errorMsg.classList.add('show');
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Se connecter';
@@ -175,7 +169,6 @@
         }
     });
 
-    // Log dans la console pour déboguer
     console.log('🔑 Identifiants admin par défaut : admin / changeme');
 </script>
 </body>
