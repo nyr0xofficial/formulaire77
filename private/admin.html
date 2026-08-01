@@ -3,516 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Messages</title>
+    <title>Admin - Connexion</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background-color: #000000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 40px 20px;
-            color: #e7e9ea;
-            min-height: 100vh;
-        }
-
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .admin-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #2f3336;
-            flex-wrap: wrap;
-            gap: 16px;
+            min-height: 100vh;
+            padding: 20px;
         }
-
-        .admin-header h1 {
+        .login-container {
+            background-color: #121212;
+            border-radius: 32px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+            border: 1px solid #2f3336;
+        }
+        .login-title {
+            color: #e7e9ea;
             font-size: 28px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .admin-header h1 span {
-            background-color: #1d9bf0;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 2px 12px;
-            border-radius: 40px;
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .admin-actions .count {
-            color: #71767b;
-            font-size: 14px;
-        }
-
-        .btn-logout {
-            background-color: #2f3336;
-            color: #e7e9ea;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-logout:hover {
-            background-color: #3d4144;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            text-align: center;
             margin-bottom: 32px;
         }
-
-        .stat-card {
-            background-color: #121212;
-            border: 1px solid #2f3336;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
+        .form-group {
+            margin-bottom: 16px;
         }
-
-        .stat-card .number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #e7e9ea;
-        }
-
-        .stat-card .label {
+        .form-group label {
+            display: block;
             color: #71767b;
-            font-size: 14px;
-            margin-top: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
         }
-
-        .messages-table-wrapper {
-            background-color: #121212;
-            border: 1px solid #2f3336;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .messages-table {
+        .form-group input {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        .messages-table thead {
-            background-color: #1c1c1c;
-        }
-
-        .messages-table th {
-            text-align: left;
             padding: 14px 16px;
-            color: #71767b;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #2f3336;
-        }
-
-        .messages-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #1c1c1c;
-            vertical-align: middle;
-        }
-
-        .messages-table tr:hover td {
-            background-color: #1c1c1c;
-        }
-
-        .messages-table .message-text {
-            max-width: 300px;
-            word-break: break-word;
+            background-color: #000000;
+            border: 1px solid #2f3336;
+            border-radius: 8px;
             color: #e7e9ea;
+            font-size: 16px;
+            outline: none;
         }
-
-        .messages-table .email-cell {
-            color: #1d9bf0;
-            text-decoration: none;
+        .form-group input:focus {
+            border-color: #1d9bf0;
+            box-shadow: 0 0 0 2px rgba(29, 155, 240, 0.3);
         }
-
-        .messages-table .email-cell:hover {
-            text-decoration: underline;
-        }
-
-        .messages-table .date-cell {
-            color: #71767b;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
-        .messages-table .id-cell {
-            color: #71767b;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .btn-delete {
-            background-color: rgba(244, 33, 46, 0.15);
-            color: #f4212e;
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #1d9bf0;
             border: none;
-            padding: 6px 16px;
             border-radius: 40px;
-            font-size: 13px;
-            font-weight: 600;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.15s;
+            margin-top: 12px;
         }
-
-        .btn-delete:hover {
-            background-color: rgba(244, 33, 46, 0.3);
-        }
-
-        .btn-delete:active {
-            transform: scale(0.95);
-        }
-
-        .btn-delete:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .empty-state {
+        .login-btn:hover { background-color: #1a8cd8; }
+        .error-message {
+            background-color: rgba(244, 33, 46, 0.1);
+            border: 1px solid rgba(244, 33, 46, 0.3);
+            color: #f4212e;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
             text-align: center;
-            padding: 60px 20px;
-            color: #71767b;
-        }
-
-        .empty-state .icon {
-            font-size: 48px;
             margin-bottom: 16px;
+            display: none;
         }
-
-        .empty-state h3 {
-            color: #e7e9ea;
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .loading-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #71767b;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid #2f3336;
-            border-radius: 50%;
-            border-top-color: #1d9bf0;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 16px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 16px;
-            }
-            .admin-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .admin-header h1 {
-                font-size: 22px;
-            }
-            .messages-table-wrapper {
-                overflow-x: auto;
-            }
-            .messages-table {
-                font-size: 13px;
-                min-width: 600px;
-            }
-            .messages-table th,
-            .messages-table td {
-                padding: 10px 12px;
-            }
-            .messages-table .message-text {
-                max-width: 150px;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .error-message.show { display: block; }
     </style>
 </head>
 <body>
-
-<div class="admin-container">
-    <header class="admin-header">
-        <h1>
-            📨 Messages
-            <span id="message-count">0</span>
-        </h1>
-        <div class="admin-actions">
-            <span class="count" id="total-label">Total : 0 message(s)</span>
-            <button class="btn-logout" id="logout-btn">🚪 Déconnexion</button>
+<div class="login-container">
+    <h1 class="login-title">🔐 Admin</h1>
+    <div id="error-message" class="error-message">❌ Identifiants incorrects</div>
+    <form id="admin-login-form">
+        <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" placeholder="admin" required autofocus>
         </div>
-    </header>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="number" id="stat-total">0</div>
-            <div class="label">Total des messages</div>
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" placeholder="••••••••" required>
         </div>
-        <div class="stat-card">
-            <div class="number" id="stat-today">0</div>
-            <div class="label">Aujourd'hui</div>
-        </div>
-        <div class="stat-card">
-            <div class="number" id="stat-week">0</div>
-            <div class="label">Cette semaine</div>
-        </div>
-        <div class="stat-card">
-            <div class="number" id="stat-month">0</div>
-            <div class="label">Ce mois-ci</div>
-        </div>
-    </div>
-
-    <div class="messages-table-wrapper">
-        <div id="loading-state" class="loading-state">
-            <div class="spinner"></div>
-            <p>Chargement des messages...</p>
-        </div>
-
-        <div id="messages-content" style="display: none;">
-            <table class="messages-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th style="text-align: center;">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="messages-tbody"></tbody>
-            </table>
-        </div>
-
-        <div id="empty-state" class="empty-state" style="display: none;">
-            <div class="icon">📭</div>
-            <h3>Aucun message</h3>
-            <p>Le formulaire n'a encore reçu aucun message.</p>
-        </div>
-    </div>
+        <button type="submit" class="login-btn">Se connecter</button>
+    </form>
 </div>
-
 <script>
-    const API_URL = '/api/messages';
-    const tbody = document.getElementById('messages-tbody');
-    const loadingState = document.getElementById('loading-state');
-    const messagesContent = document.getElementById('messages-content');
-    const emptyState = document.getElementById('empty-state');
-    const messageCount = document.getElementById('message-count');
-    const totalLabel = document.getElementById('total-label');
+    const form = document.getElementById('admin-login-form');
+    const errorMsg = document.getElementById('error-message');
 
-    const statTotal = document.getElementById('stat-total');
-    const statToday = document.getElementById('stat-today');
-    const statWeek = document.getElementById('stat-week');
-    const statMonth = document.getElementById('stat-month');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMsg.classList.remove('show');
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
 
-    async function loadMessages() {
         try {
-            loadingState.style.display = 'block';
-            messagesContent.style.display = 'none';
-            emptyState.style.display = 'none';
-
-            const response = await fetch(API_URL);
-            
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    window.location.href = '/admin';
-                    return;
-                }
-                throw new Error(`Erreur ${response.status}`);
-            }
-
-            const messages = await response.json();
-
-            loadingState.style.display = 'none';
-
-            if (!messages || messages.length === 0) {
-                emptyState.style.display = 'block';
-                updateStats([]);
-                return;
-            }
-
-            messagesContent.style.display = 'block';
-            renderMessages(messages);
-            updateStats(messages);
-
-        } catch (error) {
-            console.error('Erreur de chargement:', error);
-            loadingState.style.display = 'none';
-            emptyState.style.display = 'block';
-            document.querySelector('#empty-state h3').textContent = '⚠️ Erreur de chargement';
-            document.querySelector('#empty-state p').textContent = `Impossible de charger les messages : ${error.message}`;
-        }
-    }
-
-    function renderMessages(messages) {
-        tbody.innerHTML = '';
-
-        messages.forEach((msg) => {
-            const tr = document.createElement('tr');
-            
-            const dateObj = new Date(msg.created_at);
-            const dateFormatted = dateObj.toLocaleString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            const response = await fetch('/api/admin-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
             });
 
-            let messageText = msg.message;
-            if (messageText.length > 120) {
-                messageText = messageText.substring(0, 120) + '...';
+            if (response.ok) {
+                window.location.href = '/admin/dashboard';
+            } else {
+                errorMsg.classList.add('show');
             }
-
-            tr.innerHTML = `
-                <td class="id-cell">#${msg.id}</td>
-                <td><strong>${escapeHtml(msg.name)}</strong></td>
-                <td><a href="mailto:${escapeHtml(msg.email)}" class="email-cell">${escapeHtml(msg.email)}</a></td>
-                <td class="message-text" title="${escapeHtml(msg.message)}">${escapeHtml(messageText)}</td>
-                <td class="date-cell">${dateFormatted}</td>
-                <td style="text-align: center;">
-                    <button class="btn-delete" data-id="${msg.id}">🗑️ Supprimer</button>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        });
-
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', handleDelete);
-        });
-
-        const count = messages.length;
-        messageCount.textContent = count;
-        totalLabel.textContent = `Total : ${count} message${count > 1 ? 's' : ''}`;
-    }
-
-    function updateStats(messages) {
-        const total = messages.length;
-        statTotal.textContent = total;
-
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const weekAgo = new Date(today);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        const monthAgo = new Date(today);
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-
-        let todayCount = 0, weekCount = 0, monthCount = 0;
-
-        messages.forEach(msg => {
-            const msgDate = new Date(msg.created_at);
-            if (msgDate >= today) todayCount++;
-            if (msgDate >= weekAgo) weekCount++;
-            if (msgDate >= monthAgo) monthCount++;
-        });
-
-        statToday.textContent = todayCount;
-        statWeek.textContent = weekCount;
-        statMonth.textContent = monthCount;
-    }
-
-    async function handleDelete(e) {
-        const btn = e.currentTarget;
-        const id = btn.dataset.id;
-
-        if (!confirm(`⚠️ Supprimer définitivement le message #${id} ?`)) return;
-
-        btn.disabled = true;
-        btn.textContent = '⏳...';
-
-        try {
-            const response = await fetch(`/api/messages/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    window.location.href = '/admin';
-                    return;
-                }
-                throw new Error(`Erreur ${response.status}`);
-            }
-
-            loadMessages();
-
         } catch (error) {
-            console.error('Erreur de suppression:', error);
-            btn.disabled = false;
-            btn.textContent = '🗑️ Supprimer';
-            alert('❌ Erreur lors de la suppression.');
-        }
-    }
-
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        if (!confirm('Voulez-vous vraiment vous déconnecter ?')) return;
-
-        try {
-            await fetch('/api/logout', { method: 'POST' });
-            window.location.href = '/admin';
-        } catch (error) {
-            console.error('Erreur de déconnexion:', error);
-            window.location.href = '/admin';
+            errorMsg.classList.add('show');
         }
     });
-
-    loadMessages();
-    setInterval(loadMessages, 30000);
-
-    console.log('📊 Panel Admin X chargé');
-    console.log('🔑 Connecté en tant qu\'administrateur');
 </script>
-
 </body>
 </html>

