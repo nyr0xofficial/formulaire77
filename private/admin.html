@@ -81,12 +81,27 @@
             display: none;
         }
         .error-message.show { display: block; }
+        .success-message {
+            background-color: rgba(0, 186, 124, 0.15);
+            border: 1px solid rgba(0, 186, 124, 0.3);
+            color: #00ba7c;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .success-message.show { display: block; }
     </style>
 </head>
 <body>
 <div class="login-container">
     <h1 class="login-title">🔐 Admin</h1>
+    
     <div id="error-message" class="error-message">❌ Identifiants incorrects</div>
+    <div id="success-message" class="success-message">✅ Connexion réussie ! Redirection...</div>
+    
     <form id="admin-login-form">
         <div class="form-group">
             <label for="username">Nom d'utilisateur</label>
@@ -96,36 +111,72 @@
             <label for="password">Mot de passe</label>
             <input type="password" id="password" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="login-btn">Se connecter</button>
+        <button type="submit" class="login-btn" id="login-btn">Se connecter</button>
     </form>
 </div>
+
 <script>
+    console.log('🔐 Page admin chargée');
+    
     const form = document.getElementById('admin-login-form');
     const errorMsg = document.getElementById('error-message');
+    const successMsg = document.getElementById('success-message');
+    const loginBtn = document.getElementById('login-btn');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('🔄 Tentative de connexion...');
+        
+        // Cacher les anciens messages
         errorMsg.classList.remove('show');
+        successMsg.classList.remove('show');
+        
+        // Désactiver le bouton
+        loginBtn.disabled = true;
+        loginBtn.textContent = '⏳ Connexion...';
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
 
+        console.log(`👤 Tentative avec : ${username} / ${password}`);
+
         try {
             const response = await fetch('/api/admin-login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ username, password })
             });
 
+            console.log(`📡 Réponse du serveur : ${response.status}`);
+
             if (response.ok) {
-                window.location.href = '/admin/dashboard';
+                // Succès
+                successMsg.classList.add('show');
+                loginBtn.textContent = '✅ Connecté';
+                
+                // Redirection après 1.5 secondes
+                setTimeout(() => {
+                    window.location.href = '/admin/dashboard';
+                }, 1500);
             } else {
+                // Échec
                 errorMsg.classList.add('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Se connecter';
             }
         } catch (error) {
+            console.error('❌ Erreur réseau:', error);
+            errorMsg.textContent = '❌ Erreur réseau. Vérifiez votre connexion.';
             errorMsg.classList.add('show');
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Se connecter';
         }
     });
+
+    // Log dans la console pour déboguer
+    console.log('🔑 Identifiants admin par défaut : admin / changeme');
 </script>
 </body>
 </html>
