@@ -137,7 +137,9 @@
   <div class="page">
     <header>
       <div class="brand">Administration — <em>messages</em></div>
-      <div class="brand-meta">accès protégé</div>
+      <form method="POST" action="/admin/logout">
+        <button type="submit" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; background: none; border: none; color: var(--ink-soft); text-decoration: underline; cursor: pointer;">se déconnecter</button>
+      </form>
     </header>
 
     <p class="eyebrow" id="entries-count">Registre</p>

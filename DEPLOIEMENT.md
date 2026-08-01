@@ -61,7 +61,7 @@ https://formulaire-db.onrender.com
 
 Ouvre l'adresse fournie par Render et remplis le formulaire — tu dois voir un message de confirmation, sans aucune donnée affichée publiquement.
 
-Pour consulter les messages reçus, va sur `https://ton-site.onrender.com/admin`. Le navigateur te demande un nom d'utilisateur et un mot de passe : utilise ceux définis dans `ADMIN_USER` / `ADMIN_PASSWORD` à l'étape 3.
+Pour consulter les messages reçus, va sur `https://ton-site.onrender.com/admin`. Tu es redirigé vers une page de connexion : entre le nom d'utilisateur et le mot de passe définis dans `ADMIN_USER` / `ADMIN_PASSWORD` à l'étape 3.
 
 Tu peux aussi consulter les données directement depuis le tableau de bord Turso (onglet "Data" de ta base).
 

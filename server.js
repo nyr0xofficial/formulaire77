@@ -1,7 +1,8 @@
 // server.js
 // Serveur Express : reçoit les données du formulaire public et les enregistre
-// dans une base SQLite (via @libsql/client). Une page admin protégée par
-// mot de passe permet de consulter et supprimer les messages.
+// dans une base SQLite (via @libsql/client). Une page admin protégée par un
+// formulaire de connexion (email/mot de passe + cookie) permet de consulter
+// et supprimer les messages.
 //
 // En local : les données sont stockées dans un fichier local.db (aucune configuration).
 // En ligne : définir TURSO_DATABASE_URL et TURSO_AUTH_TOKEN pour utiliser une base
@@ -9,6 +10,7 @@
 
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 const { createClient } = require('@libsql/client');
 
 const app = express();
@@ -38,26 +40,76 @@ async function initDb() {
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
 
-function requireAdmin(req, res, next) {
-  const header = req.headers.authorization;
-  if (header && header.startsWith('Basic ')) {
-    const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-    const sepIndex = decoded.indexOf(':');
-    const user = decoded.slice(0, sepIndex);
-    const pass = decoded.slice(sepIndex + 1);
-    if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
-      return next();
-    }
-  }
-  res.set('WWW-Authenticate', 'Basic realm="Administration"');
-  return res.status(401).send('Authentification requise.');
+// Jeton de session : dérivé des identifiants, stable tant qu'ils ne changent pas.
+// Change automatiquement (et invalide les sessions en cours) si ADMIN_PASSWORD change.
+const SESSION_TOKEN = crypto
+  .createHash('sha256')
+  .update(`${ADMIN_USER}:${ADMIN_PASSWORD}`)
+  .digest('hex');
+
+const COOKIE_NAME = 'admin_session';
+
+function parseCookies(req) {
+  const header = req.headers.cookie;
+  const cookies = {};
+  if (!header) return cookies;
+  header.split(';').forEach((part) => {
+    const idx = part.indexOf('=');
+    if (idx === -1) return;
+    const key = part.slice(0, idx).trim();
+    const value = part.slice(idx + 1).trim();
+    cookies[key] = decodeURIComponent(value);
+  });
+  return cookies;
+}
+
+function isAuthenticated(req) {
+  const cookies = parseCookies(req);
+  return cookies[COOKIE_NAME] === SESSION_TOKEN;
+}
+
+// Protège les routes API (répond en JSON, pas de redirection)
+function requireAdminApi(req, res, next) {
+  if (isAuthenticated(req)) return next();
+  return res.status(401).json({ error: 'Authentification requise.' });
+}
+
+// Protège les pages HTML (redirige vers la page de connexion)
+function requireAdminPage(req, res, next) {
+  if (isAuthenticated(req)) return next();
+  return res.redirect('/admin/login');
 }
 
 // --- Middlewares ---------------------------------------------------------
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// Page admin (protégée) — servie depuis /private, jamais accessible en statique public
-app.get('/admin', requireAdmin, (req, res) => {
+// --- Routes d'authentification -------------------------------------------
+
+app.get('/admin/login', (req, res) => {
+  if (isAuthenticated(req)) return res.redirect('/admin');
+  res.sendFile(path.join(__dirname, 'private', 'login.html'));
+});
+
+app.post('/admin/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (username === ADMIN_USER && password === ADMIN_PASSWORD) {
+    res.setHeader(
+      'Set-Cookie',
+      `${COOKIE_NAME}=${encodeURIComponent(SESSION_TOKEN)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 8}`
+    );
+    return res.redirect('/admin');
+  }
+  return res.redirect('/admin/login?error=1');
+});
+
+app.post('/admin/logout', (req, res) => {
+  res.setHeader('Set-Cookie', `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0`);
+  res.redirect('/admin/login');
+});
+
+// Page admin (protégée)
+app.get('/admin', requireAdminPage, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'admin.html'));
 });
 
@@ -90,7 +142,7 @@ app.post('/api/messages', async (req, res) => {
 });
 
 // Lister toutes les entrées — protégé, réservé à l'admin
-app.get('/api/messages', requireAdmin, async (req, res) => {
+app.get('/api/messages', requireAdminApi, async (req, res) => {
   try {
     const result = await db.execute('SELECT * FROM messages ORDER BY id DESC');
     res.json(result.rows);
@@ -101,7 +153,7 @@ app.get('/api/messages', requireAdmin, async (req, res) => {
 });
 
 // Supprimer une entrée — protégé, réservé à l'admin
-app.delete('/api/messages/:id', requireAdmin, async (req, res) => {
+app.delete('/api/messages/:id', requireAdminApi, async (req, res) => {
   try {
     await db.execute({ sql: 'DELETE FROM messages WHERE id = ?', args: [req.params.id] });
     res.status(204).end();

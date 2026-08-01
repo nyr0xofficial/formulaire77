@@ -27,7 +27,7 @@ npm start
 
 Puis ouvrir **http://localhost:3000** dans le navigateur. En local, les données sont stockées dans un fichier `local.db` — aucune configuration nécessaire.
 
-Pour consulter les messages reçus, ouvrir **http://localhost:3000/admin** — identifiants par défaut en local : `admin` / `changeme` (à changer en production via les variables d'environnement `ADMIN_USER` et `ADMIN_PASSWORD`).
+Pour consulter les messages reçus, ouvrir **http://localhost:3000/admin** — tu seras redirigé vers une page de connexion. Identifiants par défaut en local : `admin` / `changeme` (à changer en production via les variables d'environnement `ADMIN_USER` et `ADMIN_PASSWORD`).
 
 ## Comment ça fonctionne
 
