@@ -47,6 +47,8 @@ Garde ces deux valeurs de côté, tu en auras besoin à l'étape suivante.
 5. Dans la section **Environment Variables**, ajoute :
    - `TURSO_DATABASE_URL` → l'URL récupérée à l'étape 2
    - `TURSO_AUTH_TOKEN` → le jeton récupéré à l'étape 2
+   - `ADMIN_USER` → le nom d'utilisateur pour accéder à `/admin` (ex. `admin`)
+   - `ADMIN_PASSWORD` → un mot de passe fort de ton choix (ne garde surtout pas `changeme`)
 6. Clique sur **Create Web Service**.
 
 Render installe les dépendances et démarre le serveur. Après une minute ou deux, ton site est en ligne à une adresse du type :
@@ -57,7 +59,11 @@ https://formulaire-db.onrender.com
 
 ## Étape 4 — Vérifier
 
-Ouvre l'adresse fournie par Render, remplis le formulaire, et vérifie que le message apparaît bien dans la liste. Tu peux aussi consulter les données directement depuis le tableau de bord Turso (onglet "Data" de ta base).
+Ouvre l'adresse fournie par Render et remplis le formulaire — tu dois voir un message de confirmation, sans aucune donnée affichée publiquement.
+
+Pour consulter les messages reçus, va sur `https://ton-site.onrender.com/admin`. Le navigateur te demande un nom d'utilisateur et un mot de passe : utilise ceux définis dans `ADMIN_USER` / `ADMIN_PASSWORD` à l'étape 3.
+
+Tu peux aussi consulter les données directement depuis le tableau de bord Turso (onglet "Data" de ta base).
 
 ---
 
