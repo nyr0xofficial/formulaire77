@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #000000;
+            background: #000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
@@ -16,13 +16,13 @@
             padding: 20px;
         }
         .login-container {
-            background-color: #121212;
+            background: #121212;
             border-radius: 32px;
             padding: 40px 32px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
             border: 1px solid #2f3336;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
         }
         .login-title {
             color: #e7e9ea;
@@ -31,9 +31,7 @@
             text-align: center;
             margin-bottom: 32px;
         }
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
         .form-group label {
             display: block;
             color: #71767b;
@@ -44,7 +42,7 @@
         .form-group input {
             width: 100%;
             padding: 14px 16px;
-            background-color: #000000;
+            background: #000;
             border: 1px solid #2f3336;
             border-radius: 8px;
             color: #e7e9ea;
@@ -53,42 +51,39 @@
         }
         .form-group input:focus {
             border-color: #1d9bf0;
-            box-shadow: 0 0 0 2px rgba(29, 155, 240, 0.3);
+            box-shadow: 0 0 0 2px rgba(29,155,240,0.3);
         }
         .login-btn {
             width: 100%;
             padding: 14px;
-            background-color: #1d9bf0;
+            background: #1d9bf0;
             border: none;
             border-radius: 40px;
-            color: #ffffff;
+            color: #fff;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.15s;
             margin-top: 12px;
         }
-        .login-btn:hover { background-color: #1a8cd8; }
+        .login-btn:hover { background: #1a8cd8; }
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-message {
-            background-color: rgba(244, 33, 46, 0.1);
-            border: 1px solid rgba(244, 33, 46, 0.3);
+            background: rgba(244,33,46,0.1);
+            border: 1px solid rgba(244,33,46,0.3);
             color: #f4212e;
             padding: 12px 16px;
             border-radius: 8px;
-            font-size: 14px;
             text-align: center;
             margin-bottom: 16px;
             display: none;
         }
         .error-message.show { display: block; }
         .success-message {
-            background-color: rgba(0, 186, 124, 0.15);
-            border: 1px solid rgba(0, 186, 124, 0.3);
+            background: rgba(0,186,124,0.15);
+            border: 1px solid rgba(0,186,124,0.3);
             color: #00ba7c;
             padding: 12px 16px;
             border-radius: 8px;
-            font-size: 14px;
             text-align: center;
             margin-bottom: 16px;
             display: none;
@@ -99,10 +94,9 @@
 <body>
 <div class="login-container">
     <h1 class="login-title">🔐 Admin</h1>
-    
     <div id="error-message" class="error-message">❌ Identifiants incorrects</div>
-    <div id="success-message" class="success-message">✅ Connexion réussie ! Redirection...</div>
-    
+    <div id="success-message" class="success-message">✅ Connexion réussie !</div>
+
     <form id="admin-login-form">
         <div class="form-group">
             <label for="username">Nom d'utilisateur</label>
@@ -117,8 +111,6 @@
 </div>
 
 <script>
-    console.log('🔐 Page admin chargée');
-    
     const form = document.getElementById('admin-login-form');
     const errorMsg = document.getElementById('error-message');
     const successMsg = document.getElementById('success-message');
@@ -126,8 +118,6 @@
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('🔄 Tentative de connexion...');
-        
         errorMsg.classList.remove('show');
         successMsg.classList.remove('show');
         loginBtn.disabled = true;
@@ -136,18 +126,12 @@
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
 
-        console.log(`👤 Tentative avec : ${username} / ${password}`);
-
         try {
             const response = await fetch('/api/admin-login', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
-
-            console.log(`📡 Réponse du serveur : ${response.status}`);
 
             if (response.ok) {
                 successMsg.classList.add('show');
@@ -161,15 +145,11 @@
                 loginBtn.textContent = 'Se connecter';
             }
         } catch (error) {
-            console.error('❌ Erreur réseau:', error);
-            errorMsg.textContent = '❌ Erreur réseau. Vérifiez votre connexion.';
             errorMsg.classList.add('show');
             loginBtn.disabled = false;
             loginBtn.textContent = 'Se connecter';
         }
     });
-
-    console.log('🔑 Identifiants admin par défaut : admin / changeme');
 </script>
 </body>
 </html>

