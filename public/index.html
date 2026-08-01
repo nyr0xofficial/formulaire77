@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carnet de messages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EEF0EA;
+    --paper-card: #F8F9F5;
+    --ink: #22333B;
+    --ink-soft: #5B6B70;
+    --rule: #C9CFC2;
+    --leather: #8C5E3C;
+    --leather-soft: #E4D2C2;
+    --moss: #5C7B6D;
+    --error: #A3372E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .brand {
+    font-family: 'Newsreader', serif;
+    font-size: 2.1rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .brand em {
+    color: var(--leather);
+    font-style: italic;
+  }
+
+  .brand-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3.5rem;
+  }
+
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--leather);
+    margin: 0 0 0.6rem;
+  }
+
+  h1.section-title {
+    font-family: 'Newsreader', serif;
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin: 0 0 1.5rem;
+  }
+
+  /* --- Formulaire --- */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .field label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .field input,
+  .field textarea {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.98rem;
+    color: var(--ink);
+    background: var(--paper-card);
+    border: none;
+    border-bottom: 1.5px solid var(--rule);
+    padding: 0.65rem 0.1rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+    resize: vertical;
+  }
+
+  .field textarea { min-height: 96px; line-height: 1.6; }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-bottom-color: var(--leather);
+  }
+
+  .field.invalid input,
+  .field.invalid textarea {
+    border-bottom-color: var(--error);
+  }
+
+  .field-error {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--error);
+    min-height: 1em;
+  }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  button.submit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 0.85rem 1.6rem;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  button.submit:hover { background: var(--leather); }
+  button.submit:active { transform: scale(0.98); }
+  button.submit:disabled { opacity: 0.5; cursor: default; }
+
+  .status-msg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--moss);
+  }
+  .status-msg.error { color: var(--error); }
+
+  /* --- Liste des entrées (ledger) --- */
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 3.4rem 1fr auto;
+    gap: 1rem;
+    align-items: start;
+    padding: 1.1rem 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+
+  .entry-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--leather);
+    padding-top: 0.15rem;
+  }
+
+  .entry-body .entry-top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+  }
+
+  .entry-name {
+    font-family: 'Newsreader', serif;
+    font-size: 1.05rem;
+  }
+
+  .entry-email {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+  }
+
+  .entry-msg {
+    font-size: 0.92rem;
+    color: var(--ink);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .entry-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    margin-top: 0.35rem;
+  }
+
+  .entry-delete {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+  .entry-delete:hover { color: var(--error); }
+
+  .empty-state {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    padding: 2rem 0;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand">Carnet de <em>messages</em></div>
+      <div class="brand-meta">SQLite &middot; local<br>base &ndash; data.db</div>
+    </header>
+
+    <main>
+      <section>
+        <p class="eyebrow">Nouvelle entrée</p>
+        <h1 class="section-title">Laisser un message</h1>
+
+        <form id="msg-form" novalidate>
+          <div class="field" id="field-nom">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" name="nom" placeholder="Jeanne Dubois" autocomplete="name" />
+            <span class="field-error" id="err-nom"></span>
+          </div>
+
+          <div class="field" id="field-email">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="jeanne@exemple.com" autocomplete="email" />
+            <span class="field-error" id="err-email"></span>
+          </div>
+
+          <div class="field" id="field-message">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Votre message ici…"></textarea>
+            <span class="field-error" id="err-message"></span>
+          </div>
+
+          <div class="submit-row">
+            <button type="submit" class="submit" id="submit-btn">Envoyer</button>
+            <span class="status-msg" id="status-msg"></span>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        <p class="eyebrow" id="entries-count">Registre</p>
+        <h1 class="section-title">Messages enregistrés</h1>
+        <div class="entries" id="entries-list">
+          <p class="empty-state">Chargement…</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+const form = document.getElementById('msg-form');
+const submitBtn = document.getElementById('submit-btn');
+const statusMsg = document.getElementById('status-msg');
+const entriesList = document.getElementById('entries-list');
+const entriesCount = document.getElementById('entries-count');
+
+const fields = ['nom', 'email', 'message'];
+
+function clearErrors() {
+  fields.forEach(f => {
+    document.getElementById('field-' + f).classList.remove('invalid');
+    document.getElementById('err-' + f).textContent = '';
+  });
+}
+
+function setError(field, text) {
+  document.getElementById('field-' + field).classList.add('invalid');
+  document.getElementById('err-' + field).textContent = text;
+}
+
+function validate(data) {
+  let ok = true;
+  if (!data.nom.trim()) { setError('nom', 'Le nom est requis.'); ok = false; }
+  if (!data.email.trim()) { setError('email', "L'email est requis."); ok = false; }
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) { setError('email', 'Email invalide.'); ok = false; }
+  if (!data.message.trim()) { setError('message', 'Le message est requis.'); ok = false; }
+  return ok;
+}
+
+function formatDate(iso) {
+  const d = new Date(iso + 'Z');
+  return d.toLocaleString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+async function loadEntries() {
+  try {
+    const res = await fetch('/api/messages');
+    const rows = await res.json();
+    entriesCount.textContent = 'Registre — ' + rows.length + (rows.length > 1 ? ' entrées' : ' entrée');
+
+    if (rows.length === 0) {
+      entriesList.innerHTML = '<p class="empty-state">Aucun message pour le moment. Soyez le premier à écrire.</p>';
+      return;
+    }
+
+    entriesList.innerHTML = rows.map(r => `
+      <div class="entry" data-id="${r.id}">
+        <div class="entry-num">N&deg;${String(r.id).padStart(3, '0')}</div>
+        <div class="entry-body">
+          <div class="entry-top">
+            <span class="entry-name">${escapeHtml(r.nom)}</span>
+            <span class="entry-email">${escapeHtml(r.email)}</span>
+          </div>
+          <p class="entry-msg">${escapeHtml(r.message)}</p>
+          <div class="entry-date">${formatDate(r.date_creation)}</div>
+        </div>
+        <button class="entry-delete" data-id="${r.id}">supprimer</button>
+      </div>
+    `).join('');
+
+    entriesList.querySelectorAll('.entry-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await fetch('/api/messages/' + btn.dataset.id, { method: 'DELETE' });
+        loadEntries();
+      });
+    });
+  } catch (err) {
+    entriesList.innerHTML = '<p class="empty-state">Impossible de charger les messages.</p>';
+  }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErrors();
+  statusMsg.textContent = '';
+  statusMsg.classList.remove('error');
+
+  const data = {
+    nom: document.getElementById('nom').value,
+    email: document.getElementById('email').value,
+    message: document.getElementById('message').value,
+  };
+
+  if (!validate(data)) return;
+
+  submitBtn.disabled = true;
+  statusMsg.textContent = 'Envoi…';
+
+  try {
+    const res = await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || 'Erreur inconnue.');
+    }
+    form.reset();
+    statusMsg.textContent = 'Message enregistré.';
+    loadEntries();
+  } catch (err) {
+    statusMsg.textContent = err.message;
+    statusMsg.classList.add('error');
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+loadEntries();
+</script>
+</body>
+</html>
